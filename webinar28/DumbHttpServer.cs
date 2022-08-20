@@ -103,8 +103,6 @@ namespace webinar28
             string filename = context.Request.Url.AbsolutePath;
 
             Console.WriteLine(filename);
-
-
             // Убираем слэш в начале имени
 
             filename = filename.Substring(1);
@@ -126,6 +124,7 @@ namespace webinar28
             {
                 if(context.Request.HttpMethod == "POST" && filename.Contains("addEmployee"))
                 {
+
                     var body = new StreamReader(context.Request.InputStream).ReadToEnd();
                     string[] rawParams = body.Split('&');
                     for (int i = 0; i < rawParams.Length; i++)
@@ -138,6 +137,18 @@ namespace webinar28
                     File.WriteAllText("../../../Employees.json", JsonSerializer.Serialize(employees));
                     isRedirect = true;
                     context.Response.Headers.Add(HttpResponseHeader.Location, "/showEmployees.html");
+                }
+                else if (context.Request.HttpMethod == "GET" && filename.Contains("Employee.html"))
+                {
+                    int.TryParse(context.Request.QueryString.Get("id"), out int id);
+                    foreach (var empl in employees)
+                    {
+                        if (empl.Id == id)
+                        {
+                            content = BuildHtml(filename, empl);
+                            break;
+                        }
+                    }
                 }
                 else
                     content = BuildHtml(filename,employees);
@@ -236,10 +247,39 @@ namespace webinar28
             return contentType;
 
         }
+
+        //private string BuildEmployeeHtml(string filename, Employee employee)
+        //{
+        //    string html = "";
+        //    string layoutPath = Path.Combine(_siteDirectory, "layout.html");
+        //    string filePath = Path.Combine(_siteDirectory, filename);
+        //    var razorService = Engine.Razor; // Подключаем движок
+
+        //    if (!razorService.IsTemplateCached("layout", null)) // Проверяем наличие базового шаблона в кэше
+        //        razorService.AddTemplate("layout", File.ReadAllText(layoutPath)); //Добавляем его если отсутствует
+
+
+        //    if (!razorService.IsTemplateCached(filename, null))//Находим шаблон страницы который будет вложен в базовый
+
+        //    {
+
+        //        razorService.AddTemplate(filename, File.ReadAllText(filePath));
+
+        //        razorService.Compile(filename);
+
+        //    }
+
+
+        //    html = razorService.Run(filename, null, new
+        //    {
+        //        Employee = employee
+        //    }) ;
+
+        //    return html;
+        //}
+
         private string BuildHtml(string filename, object result)
-
         {
-
             string html = "";
 
             string layoutPath = Path.Combine(_siteDirectory, "layout.html");
@@ -251,10 +291,7 @@ namespace webinar28
 
 
             if (!razorService.IsTemplateCached("layout", null)) // Проверяем наличие базового шаблона в кэше
-
                 razorService.AddTemplate("layout", File.ReadAllText(layoutPath)); //Добавляем его если отсутствует
-
-
 
 
             if (!razorService.IsTemplateCached(filename, null))//Находим шаблон страницы который будет вложен в базовый
