@@ -105,12 +105,12 @@ namespace webinar28
             Console.WriteLine(filename);
             // Убираем слэш в начале имени
 
-            filename = filename.Substring(1);
+            string test = filename.Substring(1);
 
 
             // Формируем полный путь к файлу
 
-            filename = Path.Combine(_siteDirectory, filename);
+            filename = Path.Combine(_siteDirectory, test);
 
             string content = "";
 
@@ -138,7 +138,7 @@ namespace webinar28
                     isRedirect = true;
                     context.Response.Headers.Add(HttpResponseHeader.Location, "/showEmployees.html");
                 }
-                else if (context.Request.HttpMethod == "GET" && filename.Contains("Employee.html"))
+                else if (context.Request.HttpMethod == "GET" && test == ("Employee.html"))
                 {
                     int.TryParse(context.Request.QueryString.Get("id"), out int id);
                     foreach (var empl in employees)
